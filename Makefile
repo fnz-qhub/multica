@@ -1,4 +1,4 @@
-.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop k8s-prereqs k8s-validate k8s-build-staging k8s-build-production k8s-diff k8s-deploy k8s-status k8s-logs docker-build docker-build-web
+.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop k8s-prereqs k8s-validate k8s-build-staging k8s-build-production k8s-diff k8s-deploy k8s-status k8s-logs docker-build docker-build-web docker-push docker-push-web docker-all
 
 MAIN_ENV_FILE ?= .env
 WORKTREE_ENV_FILE ?= .env.worktree
@@ -310,6 +310,18 @@ docker-build:
 docker-build-web:
 	docker build -t $(IMAGE_REGISTRY)/web:$(IMAGE_TAG) \
 		-f Dockerfile.web .
+
+# Push backend image to registry
+docker-push: docker-build
+	docker push $(IMAGE_REGISTRY)/backend:$(IMAGE_TAG)
+
+# Push frontend image to registry
+docker-push-web: docker-build-web
+	docker push $(IMAGE_REGISTRY)/web:$(IMAGE_TAG)
+
+# Build and push all images
+docker-all: docker-push docker-push-web
+	@echo "✓ All images pushed: $(IMAGE_REGISTRY)/*:$(IMAGE_TAG)"
 
 # ---------- Cleanup ----------
 

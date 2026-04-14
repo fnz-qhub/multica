@@ -156,6 +156,9 @@ make k8s-build-staging        # Render staging manifests to stdout
 make k8s-build-production     # Render production manifests to stdout
 make docker-build             # Build backend Docker image
 make docker-build-web         # Build frontend Docker image
+make docker-push              # Build + push backend image to registry
+make docker-push-web          # Build + push frontend image to registry
+make docker-all               # Build + push all images
 ```
 
 ### CI Requirements

@@ -16,9 +16,13 @@ Production-ready Kubernetes manifests for deploying the Multica stack. Plain YAM
 # 0. Check cluster is ready
 make k8s-prereqs
 
-# 1. Build and push images
-make docker-build          # Backend image
-make docker-build-web      # Frontend image
+# 1. Build and push images (defaults to ghcr.io/multica-ai/multica)
+make docker-all            # Build + push both images
+# Or individually:
+#   make docker-push           # Backend only
+#   make docker-push-web       # Frontend only
+# Override registry/tag:
+#   make docker-all IMAGE_REGISTRY=your-registry.io/multica IMAGE_TAG=v1.0.0
 
 # 2. Update image references in manifests (or use kustomize images)
 #    See "Image Configuration" below
