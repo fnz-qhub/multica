@@ -8,3 +8,4 @@ resources:
   - backend/
   - frontend/
   - ingress/
+  - hardening/
