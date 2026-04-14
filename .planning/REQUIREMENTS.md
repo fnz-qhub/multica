@@ -98,46 +98,46 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | — | Pending |
-| FOUND-02 | — | Pending |
-| FOUND-03 | — | Pending |
-| FOUND-04 | — | Pending |
-| FOUND-05 | — | Pending |
-| DB-01 | — | Pending |
-| DB-02 | — | Pending |
-| DB-03 | — | Pending |
-| DB-04 | — | Pending |
-| DB-05 | — | Pending |
-| DB-06 | — | Pending |
-| BE-01 | — | Pending |
-| BE-02 | — | Pending |
-| BE-03 | — | Pending |
-| BE-04 | — | Pending |
-| BE-05 | — | Pending |
-| BE-06 | — | Pending |
-| BE-07 | — | Pending |
-| BE-08 | — | Pending |
-| BE-09 | — | Pending |
-| FE-01 | — | Pending |
-| FE-02 | — | Pending |
-| FE-03 | — | Pending |
-| FE-04 | — | Pending |
-| FE-05 | — | Pending |
-| FE-06 | — | Pending |
-| ING-01 | — | Pending |
-| ING-02 | — | Pending |
-| ING-03 | — | Pending |
-| ING-04 | — | Pending |
-| HARD-01 | — | Pending |
-| HARD-02 | — | Pending |
-| HARD-03 | — | Pending |
-| HARD-04 | — | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Pending |
+| DB-02 | Phase 1 | Pending |
+| DB-03 | Phase 1 | Pending |
+| DB-04 | Phase 1 | Pending |
+| DB-05 | Phase 1 | Pending |
+| DB-06 | Phase 1 | Pending |
+| BE-01 | Phase 2 | Pending |
+| BE-02 | Phase 2 | Pending |
+| BE-03 | Phase 2 | Pending |
+| BE-04 | Phase 2 | Pending |
+| BE-05 | Phase 2 | Pending |
+| BE-06 | Phase 2 | Pending |
+| BE-07 | Phase 2 | Pending |
+| BE-08 | Phase 2 | Pending |
+| BE-09 | Phase 2 | Pending |
+| FE-01 | Phase 2 | Pending |
+| FE-02 | Phase 2 | Pending |
+| FE-03 | Phase 2 | Pending |
+| FE-04 | Phase 2 | Pending |
+| FE-05 | Phase 2 | Pending |
+| FE-06 | Phase 2 | Pending |
+| ING-01 | Phase 3 | Pending |
+| ING-02 | Phase 3 | Pending |
+| ING-03 | Phase 3 | Pending |
+| ING-04 | Phase 3 | Pending |
+| HARD-01 | Phase 3 | Pending |
+| HARD-02 | Phase 3 | Pending |
+| HARD-03 | Phase 3 | Pending |
+| HARD-04 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 34 total
-- Mapped to phases: 0
-- Unmapped: 34 (pending roadmap creation)
+- Mapped to phases: 34
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-14*
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap creation*
