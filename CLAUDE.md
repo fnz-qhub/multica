@@ -145,10 +145,15 @@ make db-up            # Start shared PostgreSQL (pgvector/pg17 image)
 make db-down          # Stop shared PostgreSQL
 
 # Kubernetes
+make k8s-prereqs              # Check cluster prerequisites (kubectl, ingress-nginx, secrets)
 make k8s-validate             # Validate all manifests (base + overlays) render without errors
+make k8s-deploy               # Deploy staging (validate + apply + watch rollout)
+make k8s-deploy K8S_ENV=production  # Deploy production
+make k8s-status               # Show pods, services, ingress, jobs at a glance
+make k8s-logs                 # Tail backend logs (SVC=frontend for frontend, SVC=postgres for DB)
+make k8s-diff K8S_ENV=staging # Diff local manifests against live cluster state
 make k8s-build-staging        # Render staging manifests to stdout
 make k8s-build-production     # Render production manifests to stdout
-make k8s-diff K8S_ENV=staging # Diff local manifests against live cluster state
 make docker-build             # Build backend Docker image
 make docker-build-web         # Build frontend Docker image
 ```

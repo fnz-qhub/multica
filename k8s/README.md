@@ -13,6 +13,9 @@ Production-ready Kubernetes manifests for deploying the Multica stack. Plain YAM
 ## Quick Start
 
 ```bash
+# 0. Check cluster is ready
+make k8s-prereqs
+
 # 1. Build and push images
 make docker-build          # Backend image
 make docker-build-web      # Frontend image
@@ -31,9 +34,9 @@ kubectl -n multica create secret generic postgres-secrets \
   --from-literal=POSTGRES_PASSWORD="your-password" \
   --from-literal=DATABASE_URL="postgres://multica:your-password@postgres:5432/multica?sslmode=disable"
 
-# 4. Deploy
-kubectl apply -k k8s/overlays/staging/       # Staging
-kubectl apply -k k8s/overlays/production/    # Production
+# 4. Deploy (validates, applies, watches rollout)
+make k8s-deploy                    # Staging (default)
+make k8s-deploy K8S_ENV=production # Production
 ```
 
 ## Directory Structure
@@ -175,11 +178,26 @@ images:
     newTag: v1.0.0
 ```
 
-## Validation
+## Operations
 
 ```bash
-# Validate all manifests render without errors
+# Check cluster prerequisites
+make k8s-prereqs
+
+# Validate manifests render without errors
 make k8s-validate
+
+# Deploy (validate + apply + watch rollout)
+make k8s-deploy                     # Staging (default)
+make k8s-deploy K8S_ENV=production  # Production
+
+# Check deployment health
+make k8s-status
+
+# Tail logs (default: backend)
+make k8s-logs                   # Backend logs
+make k8s-logs SVC=frontend      # Frontend logs
+make k8s-logs SVC=postgres      # PostgreSQL logs
 
 # Render manifests for review
 make k8s-build-staging

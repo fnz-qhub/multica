@@ -1,4 +1,4 @@
-.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop k8s-validate k8s-build-staging k8s-build-production k8s-diff docker-build docker-build-web
+.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop k8s-prereqs k8s-validate k8s-build-staging k8s-build-production k8s-diff k8s-deploy k8s-status k8s-logs docker-build docker-build-web
 
 MAIN_ENV_FILE ?= .env
 WORKTREE_ENV_FILE ?= .env.worktree
@@ -221,6 +221,31 @@ sqlc:
 
 IMAGE_REGISTRY ?= ghcr.io/multica-ai/multica
 IMAGE_TAG      ?= $(VERSION)
+K8S_ENV        ?= staging
+
+# Check cluster prerequisites before deploying
+k8s-prereqs:
+	@echo "==> Checking prerequisites..."
+	@command -v kubectl >/dev/null 2>&1 || { echo "✗ kubectl not found"; exit 1; }
+	@kubectl cluster-info >/dev/null 2>&1 || { echo "✗ Cannot connect to cluster. Check your kubeconfig."; exit 1; }
+	@echo "  ✓ kubectl connected to $$(kubectl config current-context)"
+	@kubectl get ingressclass nginx >/dev/null 2>&1 \
+		&& echo "  ✓ ingress-nginx controller installed" \
+		|| echo "  ⚠ ingress-nginx not found — Ingress resource will not work until installed"
+	@kubectl get storageclass >/dev/null 2>&1 \
+		&& echo "  ✓ StorageClass available: $$(kubectl get storageclass -o jsonpath='{.items[0].metadata.name}')" \
+		|| echo "  ⚠ No StorageClass found — PostgreSQL PVC may not provision"
+	@kubectl get namespace multica >/dev/null 2>&1 \
+		&& echo "  ✓ Namespace 'multica' exists" \
+		|| echo "  ○ Namespace 'multica' will be created on deploy"
+	@kubectl -n multica get secret backend-secrets >/dev/null 2>&1 \
+		&& echo "  ✓ backend-secrets configured" \
+		|| echo "  ⚠ backend-secrets not found — create before deploying (see k8s/README.md)"
+	@kubectl -n multica get secret postgres-secrets >/dev/null 2>&1 \
+		&& echo "  ✓ postgres-secrets configured" \
+		|| echo "  ⚠ postgres-secrets not found — create before deploying (see k8s/README.md)"
+	@echo ""
+	@echo "Done. Fix any ✗ errors before deploying. ⚠ warnings may resolve on first apply."
 
 # Validate all manifests render without errors
 k8s-validate:
@@ -243,6 +268,36 @@ k8s-build-production:
 # Show diff between current cluster state and local manifests (requires kubectl access)
 k8s-diff:
 	kubectl diff -k k8s/overlays/$(K8S_ENV)/ || true
+
+# Deploy to cluster (validates first, then applies)
+k8s-deploy: k8s-validate
+	@echo "==> Deploying $(K8S_ENV) overlay..."
+	kubectl apply -k k8s/overlays/$(K8S_ENV)/
+	@echo ""
+	@echo "✓ Applied. Watching rollout..."
+	@kubectl -n multica rollout status deployment/backend --timeout=120s 2>/dev/null || true
+	@kubectl -n multica rollout status deployment/frontend --timeout=120s 2>/dev/null || true
+	@echo ""
+	@echo "✓ Deploy complete. Run 'make k8s-status' to check health."
+
+# Show deployment status at a glance
+k8s-status:
+	@echo "==> Pods"
+	@kubectl -n multica get pods -o wide 2>/dev/null || echo "  (namespace 'multica' not found)"
+	@echo ""
+	@echo "==> Services"
+	@kubectl -n multica get svc 2>/dev/null || true
+	@echo ""
+	@echo "==> Ingress"
+	@kubectl -n multica get ingress 2>/dev/null || true
+	@echo ""
+	@echo "==> Jobs"
+	@kubectl -n multica get jobs 2>/dev/null || true
+
+# Tail logs for a service (usage: make k8s-logs SVC=backend)
+SVC ?= backend
+k8s-logs:
+	kubectl -n multica logs -l app.kubernetes.io/name=$(SVC) -f --tail=100
 
 # Build backend Docker image
 docker-build:
