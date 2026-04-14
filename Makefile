@@ -1,4 +1,4 @@
-.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop
+.PHONY: dev server daemon cli multica build test migrate-up migrate-down sqlc seed clean setup start stop check worktree-env setup-main start-main stop-main check-main setup-worktree start-worktree stop-worktree check-worktree db-up db-down selfhost selfhost-stop k8s-validate k8s-build-staging k8s-build-production k8s-diff docker-build docker-build-web
 
 MAIN_ENV_FILE ?= .env
 WORKTREE_ENV_FILE ?= .env.worktree
@@ -217,6 +217,46 @@ migrate-down:
 sqlc:
 	cd server && sqlc generate
 
-# Cleanup
+# ---------- Kubernetes ----------
+
+IMAGE_REGISTRY ?= ghcr.io/multica-ai/multica
+IMAGE_TAG      ?= $(VERSION)
+
+# Validate all manifests render without errors
+k8s-validate:
+	@echo "==> Validating base manifests..."
+	kubectl kustomize k8s/base/ > /dev/null
+	@echo "==> Validating staging overlay..."
+	kubectl kustomize k8s/overlays/staging/ > /dev/null
+	@echo "==> Validating production overlay..."
+	kubectl kustomize k8s/overlays/production/ > /dev/null
+	@echo "✓ All manifests valid."
+
+# Render staging manifests to stdout
+k8s-build-staging:
+	kubectl kustomize k8s/overlays/staging/
+
+# Render production manifests to stdout
+k8s-build-production:
+	kubectl kustomize k8s/overlays/production/
+
+# Show diff between current cluster state and local manifests (requires kubectl access)
+k8s-diff:
+	kubectl diff -k k8s/overlays/$(K8S_ENV)/ || true
+
+# Build backend Docker image
+docker-build:
+	docker build -t $(IMAGE_REGISTRY)/backend:$(IMAGE_TAG) \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg COMMIT=$(COMMIT) \
+		-f Dockerfile .
+
+# Build frontend Docker image
+docker-build-web:
+	docker build -t $(IMAGE_REGISTRY)/web:$(IMAGE_TAG) \
+		-f Dockerfile.web .
+
+# ---------- Cleanup ----------
+
 clean:
 	rm -rf server/bin server/tmp

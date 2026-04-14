@@ -21,6 +21,43 @@ Multica is an AI-native task management platform — like Linear, but with AI ag
 - `packages/ui/` — Atomic UI components (zero business logic)
 - `packages/views/` — Shared business pages/components (zero next/* imports, zero react-router imports)
 - `packages/tsconfig/` — Shared TypeScript configuration
+- `k8s/base/` — Kubernetes manifests (Kustomize base)
+- `k8s/overlays/` — Environment-specific Kustomize overlays (staging, production)
+
+### Kubernetes Deployment
+
+Plain YAML manifests organized with Kustomize (no Helm). Directory structure:
+
+```
+k8s/
+├── base/
+│   ├── kustomization.yaml      # Root — includes all subdirectories
+│   ├── namespace.yaml           # Namespace: multica
+│   ├── config/                  # ConfigMaps, Secrets, ServiceAccounts
+│   ├── postgres/                # StatefulSet, Services, PVC, migration Job
+│   ├── backend/                 # Deployment, Service (port 8080)
+│   ├── frontend/                # Deployment, Service (port 3000)
+│   ├── ingress/                 # Ingress with WebSocket annotations
+│   └── hardening/               # PDBs, NetworkPolicies
+└── overlays/
+    ├── staging/                 # 1 replica, lower resources, staging.multica.dev
+    └── production/              # 3 replicas, higher resources, app.multica.dev
+```
+
+**Key design decisions:**
+- PostgreSQL is a StatefulSet with `replicas: 1` (multi-replica requires CloudNativePG operator)
+- Migrations run as a Kubernetes Job (not the Docker entrypoint)
+- Ingress uses nginx annotations with 3600s timeouts for WebSocket support
+- Cookie-based sticky sessions for backend when replicas > 1
+- Secret YAML files are gitignored — only placeholder values in version control
+- SecurityContexts on all workloads: `runAsNonRoot`, drop all capabilities
+- NetworkPolicy default-deny with explicit service-to-service allows
+
+**Deploy:**
+```bash
+kubectl apply -k k8s/overlays/staging/      # Staging
+kubectl apply -k k8s/overlays/production/   # Production
+```
 
 ### Key Architectural Decisions
 
@@ -106,6 +143,14 @@ pnpm ui:add badge                # Adds component to packages/ui/components/ui/
 # Infrastructure
 make db-up            # Start shared PostgreSQL (pgvector/pg17 image)
 make db-down          # Stop shared PostgreSQL
+
+# Kubernetes
+make k8s-validate             # Validate all manifests (base + overlays) render without errors
+make k8s-build-staging        # Render staging manifests to stdout
+make k8s-build-production     # Render production manifests to stdout
+make k8s-diff K8S_ENV=staging # Diff local manifests against live cluster state
+make docker-build             # Build backend Docker image
+make docker-build-web         # Build frontend Docker image
 ```
 
 ### CI Requirements
