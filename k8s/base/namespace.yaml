@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: multica
+  labels:
+    app.kubernetes.io/part-of: multica
+    app.kubernetes.io/managed-by: kustomize
