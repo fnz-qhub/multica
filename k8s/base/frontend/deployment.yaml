@@ -24,6 +24,10 @@ spec:
     spec:
       serviceAccountName: frontend-sa
       terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
         - name: frontend
           image: frontend:latest
@@ -61,3 +65,9 @@ spec:
               port: 3000
             periodSeconds: 2
             failureThreshold: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL

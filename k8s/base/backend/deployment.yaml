@@ -24,6 +24,10 @@ spec:
     spec:
       serviceAccountName: backend-sa
       terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
       containers:
         - name: backend
           image: backend:latest
@@ -62,6 +66,12 @@ spec:
               port: 8080
             periodSeconds: 2
             failureThreshold: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           lifecycle:
             preStop:
               exec:
